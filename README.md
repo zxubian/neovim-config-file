@@ -1,6 +1,7 @@
 # neovim-config-file
 
 ## Prerequisites
+- [plug](https://github.com/junegunn/vim-plug)
 - cmake
 - visual studio build tools
 
