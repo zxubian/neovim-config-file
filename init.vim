@@ -171,9 +171,11 @@ if exists('$SHELL')
     set shell=$SHELL
 else
     if has('win32')
-        set shell=expand('powershell')
+        let powershell=expand("powershell")
+        set shell=powershell
     else
         set shell=/bin/sh
+    endif
 endif
 
 " session management
