@@ -170,7 +170,10 @@ set fileformats=unix,dos,mac
 if exists('$SHELL')
     set shell=$SHELL
 else
-    set shell=/bin/sh
+    if has('win32')
+        set shell=expand('powershell')
+    else
+        set shell=/bin/sh
 endif
 
 " session management
