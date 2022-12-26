@@ -1,5 +1,3 @@
-" vim-bootstrap 2022-12-26 01:55:14
-
 "*****************************************************************************
 "" Vim-Plug core
 "*****************************************************************************
@@ -74,7 +72,6 @@ Plug 'honza/vim-snippets'
 Plug 'vim-scripts/c.vim', {'for': ['c', 'cpp']}
 Plug 'ludwig/split-manpage.vim'
 
-
 " javascript
 "" Javascript Bundle
 Plug 'jelera/vim-javascript-syntax'
@@ -94,7 +91,11 @@ Plug 'HerringtonDarkholme/yats.vim'
 " Andy's
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'kyazdani42/nvim-web-devicons'
+
+Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'neovim/nvim-lspconfig'
+
 Plug 'ziglang/zig.vim'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
@@ -616,43 +617,51 @@ sources = cmp.config.sources({
 })
 })
 
+-- setup mason
+
+local mason = require('mason')
+mason.setup({
+    ui={
+    icons={
+        package_installed = "✓",
+        package_pending = "➜",
+        package_uninstalled = "✗"
+    }
+    }
+})
+
   -- Setup lspconfig.
   local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-  local pid = vim.fn.getpid()
-  local omnisharp_bin = "C:/Soft/OmniSharp/OmniSharp.exe"
+  local mason_lspconfig = require('mason-lspconfig')
 
-  local lspconfig = require('lspconfig')
+  mason_lspconfig.setup{
+      ensure_installed = {"clangd", "zls"},
+  }
+  local nvim_lsp = require('lspconfig')
 
-  local on_attach = function(_, bufnr)
-      local opts = { noremap=true, silent=true }
-      vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-      vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-      --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  mason_lspconfig.setup_handlers{
+      function(server_name)
+          local opts = {}
+          opts.on_attach = function(_, buffnr)
+              local bufopts = {silent = true, noremap = true}
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', bufopts)
+              vim.api.nvim_buf_set_keymap(buffnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', bufopts)
+          opts.capabilities = capabilities;
+      end
+      nvim_lsp[server_name].setup(opts)
   end
-
-  lspconfig.omnisharp.setup{
-  cmd = { omnisharp_bin, "--languageserver" , "--hostPID", tostring(pid) },
-  on_attach = on_attach,
-  capabilities = capabilities
   }
-
-  lspconfig.zls.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-  }
-
 EOF
 
 " Set completeopt to have a better completion experience
