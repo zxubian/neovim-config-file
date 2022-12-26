@@ -10,7 +10,7 @@ endif
 
 let g:vim_bootstrap_langs = "c,javascript,python,typescript"
 let g:vim_bootstrap_editor = "nvim"				" nvim or vim
-let g:vim_bootstrap_theme = "molokai"
+let g:vim_bootstrap_theme = "nightfox"
 let g:vim_bootstrap_frams = ""
 
 if !filereadable(vimplug_exists)
